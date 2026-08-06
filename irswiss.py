@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-recon-swiss-army (rswiss)
+irswiss (Irene swiss)
 Lightweight recon toolkit for HTB / TryHackMe / authorized testing.
 Single-file, zero heavy deps.
 """
@@ -275,8 +275,8 @@ def module_portscan(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="rswiss",
-        description="recon-swiss-army — lightweight recon toolkit",
+        prog="irswiss",
+        description="irswiss — lightweight recon toolkit by Irene",
     )
     sub = parser.add_subparsers(dest="module", required=True)
 
