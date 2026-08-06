@@ -7,12 +7,10 @@ Single-file, zero heavy deps.
 
 import argparse
 import os
+import re
 import sys
 import socket
 import ssl
-import subprocess
-import json
-from urllib.parse import urlparse
 from datetime import datetime
 
 # ---------------------------------------------------------------------------
@@ -28,6 +26,8 @@ MAGENTA = "\033[35m"
 CYAN = "\033[36m"
 WHITE = "\033[37m"
 GRAY = "\033[90m"
+
+DOMAIN_RE = re.compile(r'^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$')
 
 LOGO = rf""" {CYAN} _____ _       _____ _____    ____  _   _    _    _   _  ____  _____ 
 {GREEN}/ ____| |     / ____|  __ \  / __ \| \ | |  / \  | \ | |/ __ \|  ___|
@@ -58,15 +58,13 @@ def warn(msg):
 def fail(msg):
     print(f" {GRAY}[{ts()}]{RESET} {RED}[-]{RESET} {msg}", file=sys.stderr)
 
-def run(cmd, timeout=15):
-    """Run shell cmd and return stdout."""
-    try:
-        r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
-        return r.stdout.strip()
-    except subprocess.TimeoutExpired:
-        return ""
-    except FileNotFoundError:
-        return ""
+def make_ctx(verify=True):
+    if not verify:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        return ctx
+    return None
 
 def resolve(host):
     try:
@@ -80,6 +78,9 @@ def resolve(host):
 
 def module_subdomain(args):
     domain = args.domain.replace("https://", "").replace("http://", "").split("/")[0]
+    if not DOMAIN_RE.match(domain):
+        fail(f"Invalid domain format: {domain}")
+        sys.exit(1)
     wordlist = args.wordlist or "/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt"
 
     if not os.path.exists(wordlist):
@@ -158,9 +159,7 @@ def module_headers(args):
     info(f"Fetching headers: {color(CYAN, target)}")
     try:
         import urllib.request
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
+        ctx = make_ctx(args.no_verify)
         req = urllib.request.Request(target, method="HEAD")
         with urllib.request.urlopen(req, timeout=10, context=ctx) as r:
             headers = dict(r.headers)
@@ -188,9 +187,7 @@ def module_fingerprint(args):
     info(f"Fingerprinting: {color(CYAN, target)}")
     try:
         import urllib.request
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
+        ctx = make_ctx(args.no_verify)
         req = urllib.request.Request(target, method="GET")
         with urllib.request.urlopen(req, timeout=10, context=ctx) as r:
             body = r.read().decode("utf-8", errors="ignore")[:4000]
@@ -291,10 +288,12 @@ def main():
     p_hdr = sub.add_parser("headers", help="Grab HTTP response headers")
     p_hdr.add_argument("--target", required=True)
     p_hdr.add_argument("--https", action="store_true")
+    p_hdr.add_argument("--no-verify", action="store_true", help="Disable TLS verification")
 
     p_fp = sub.add_parser("fingerprint", help="Lightweight tech fingerprint")
     p_fp.add_argument("--target", required=True)
     p_fp.add_argument("--https", action="store_true")
+    p_fp.add_argument("--no-verify", action="store_true", help="Disable TLS verification")
 
     p_ps = sub.add_parser("portscan", help="Quick top-100 port scan")
     p_ps.add_argument("--target", required=True)
