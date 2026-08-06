@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-irswiss (Irene swiss)
+irswiss (Irene swiss) — Furry edition
 Lightweight recon toolkit for HTB / TryHackMe / authorized testing.
 Single-file, zero heavy deps.
+Cute, colorful, and ready to pounce.
 """
 
 import argparse
@@ -34,15 +35,23 @@ MAGENTA = "\033[35m"
 CYAN = "\033[36m"
 WHITE = "\033[37m"
 GRAY = "\033[90m"
+PINK = "\033[95m"
+ORANGE = "\033[38;5;208m"
+BROWN = "\033[38;5;130m"
 
 DOMAIN_RE = re.compile(r'^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$')
 
-LOGO = rf""" {GREEN} ____  _   _  ____  _____ 
-{BLUE}|  _ \| \ | |/ __ \|  ___|
-{MAGENTA}| |_) |  \| | |  | | |_  
-{CYAN}|  _ <| . ` | |  | |  _| 
-{YELLOW}| |_) | |\  | |__| | |   
-{RED}|____/|_| \_\____/|_| {RESET}"""
+# Furry mascot: a cute fox
+FOX_LOGO = rf"""
+  {ORANGE} /\_/\  {RESET} {PINK}(^.^)  {RESET}  {CYAN}~ ~ ~  {RESET}
+ {ORANGE}( {RED}*{ORANGE}.{RED}*{ORANGE} ) {RESET} {YELLOW}> ^ <   {RESET} {GREEN}irswiss{RESET}
+  {BROWN}\___/  {RESET} {MAGENTA}/|   |\  {RESET}  furry edition
+"""
+
+# Paw print
+PAW = rf"{BROWN}[{RESET}{YELLOW}..{RESET}{BROWN}]{RESET}"
+
+LOGO = FOX_LOGO
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -53,11 +62,16 @@ USER_AGENTS = [
     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) "
     "Gecko/20100101 Firefox/125.0",
+    "Mozilla/5.0 (compatible; irswiss-furry/1.0; +https://github.com/melonkunuku-png/irswiss)",
 ]
 
 def logo():
     print(LOGO)
-    print(f"  {GRAY}Irene Swiss — lightweight recon toolkit{RESET}\n")
+    print(f"  {PINK}~*~ Irene Swiss — lightweight recon toolkit ~*~{RESET}\n")
+
+def paw_print():
+    """Decorative paw separator"""
+    print(f"\n  {PAW} {PAW} {PAW} {PAW} {PAW}\n")
 
 def ts():
     return datetime.now().strftime("%H:%M:%S")
@@ -66,7 +80,7 @@ def color(color_code, msg):
     return f"{color_code}{msg}{RESET}"
 
 def info(msg):
-    print(f" {GRAY}[{ts()}]{RESET} {BLUE}[*]{RESET} {msg}")
+    print(f" {GRAY}[{ts()}]{RESET} {BLUE}[~]{RESET} {msg}")
 
 def ok(msg):
     print(f" {GRAY}[{ts()}]{RESET} {GREEN}[+]{RESET} {msg}")
@@ -117,7 +131,8 @@ def module_subdomain(args):
         fail(f"Wordlist not found: {wordlist}")
         sys.exit(1)
 
-    info(f"Brute-forcing subdomains for: {color(CYAN, domain)}")
+    paw_print()
+    info(f"Sniffing subdomains for: {color(CYAN, domain)}")
     info(f"Wordlist: {color(GRAY, wordlist)}")
 
     with open(wordlist) as f:
@@ -137,9 +152,9 @@ def module_subdomain(args):
         return None
 
     workers = args.workers if args.workers > 0 else min(32, os.cpu_count() * 4 or 8)
-    info(f"Workers: {workers}")
+    info(f"Pack size (workers): {workers}")
     if args.delay > 0:
-        info(f"Delay: {args.delay}s between batches")
+        info(f"Stalk delay: {args.delay}s between batches")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
         futures = {pool.submit(check, sub): sub for sub in subs}
@@ -151,15 +166,15 @@ def module_subdomain(args):
             if args.json:
                 continue
             if done % 500 == 0 or done == total:
-                info(f"Progress: {color(WHITE, str(done))}/{total}")
+                info(f"Tracking progress: {color(WHITE, str(done))}/{total}")
 
     results = sorted(found)
     for h, i in results:
         if not args.json:
-            ok(f"{color(GREEN, h)} -> {i}")
+            ok(f"{PAW} {color(GREEN, h)} -> {i}")
 
     if not args.json:
-        ok(f"Done. {color(WHITE, str(len(results)))} subdomains found.")
+        ok(f"Found {color(WHITE, str(len(results)))} nests!")
     else:
         payload = {"domain": domain, "count": len(results), "subdomains": [{"host": h, "ip": i} for h, i in results]}
         out = args.output or f"{domain}_subdomains.json"
@@ -183,7 +198,8 @@ def module_parse_nmap(args):
         fail(f"File not found: {path}")
         sys.exit(1)
 
-    info(f"Parsing: {color(GRAY, path)}")
+    paw_print()
+    info(f"Parsing den: {color(GRAY, path)}")
     with open(path) as f:
         data = f.read()
 
@@ -200,7 +216,7 @@ def module_parse_nmap(args):
                     results.setdefault(port_proto, []).append(service)
 
     if not results:
-        warn("No open ports found.")
+        warn("No open burrows found.")
         return
 
     if args.json:
@@ -213,7 +229,7 @@ def module_parse_nmap(args):
         ok(f"JSON saved to {color(GRAY, out)}")
         return
 
-    ok("Open ports:")
+    ok("Open burrows:")
     for pp, services in sorted(results.items()):
         print(f"  {color(CYAN, pp)}: {', '.join(services)}")
 
@@ -228,7 +244,8 @@ def module_headers(args):
     if args.https:
         target = target.replace("http://", "https://")
 
-    info(f"Fetching headers: {color(CYAN, target)}")
+    paw_print()
+    info(f"Sniffing scent marks (headers): {color(CYAN, target)}")
     try:
         req = build_request(target, method="HEAD")
         ctx = make_ctx(verify=not args.no_verify)
@@ -270,7 +287,8 @@ def module_fingerprint(args):
     if args.https:
         target = target.replace("http://", "https://")
 
-    info(f"Fingerprinting: {color(CYAN, target)}")
+    paw_print()
+    info(f"Identifying den markers: {color(CYAN, target)}")
     try:
         req = build_request(target)
         ctx = make_ctx(verify=not args.no_verify)
@@ -319,15 +337,15 @@ def module_fingerprint(args):
                 ok(f"JSON saved to {color(GRAY, out)}")
                 return
 
-            ok(f"Server: {color(WHITE, server)}")
+            ok(f"Species (Server): {color(WHITE, server)}")
             if xpb:
-                ok(f"X-Powered-By: {color(GREEN, xpb)}")
+                ok(f"Breed (X-Powered-By): {color(GREEN, xpb)}")
             if payload["tech"]:
-                ok(f"Possible tech: {', '.join(payload['tech'])}")
+                ok(f"Fur pattern (Tech): {', '.join(payload['tech'])}")
             if metas:
-                ok(f"Meta hints: {', '.join(metas)}")
+                ok(f"Markings (Meta): {', '.join(metas)}")
             if title:
-                ok(f"Title: {color(WHITE, title)}")
+                ok(f"Name (Title): {color(WHITE, title)}")
 
     except HTTPError as e:
         ok(f"Status: {color(WHITE, str(e.code))}")
@@ -349,7 +367,8 @@ def module_portscan(args):
         fail(f"Cannot resolve: {target}")
         sys.exit(1)
 
-    ok(f"Scanning top ports on {color(CYAN, target)} ({ip})")
+    paw_print()
+    ok(f"Prowling territory: {color(CYAN, target)} ({ip})")
     open_ports = []
     lock = __import__("threading").Lock()
 
@@ -376,7 +395,7 @@ def module_portscan(args):
                 with lock:
                     open_ports.append((port, service))
                 if not args.json:
-                    ok(f"  {color(GREEN, str(port))}/tcp  {service}")
+                    ok(f"  {PAW} {color(GREEN, str(port))}/tcp  {service}")
 
     results = sorted(open_ports)
     if args.json:
@@ -386,7 +405,7 @@ def module_portscan(args):
             json.dump(payload, f, indent=2)
         ok(f"JSON saved to {color(GRAY, out)}")
     else:
-        ok(f"Done. {color(WHITE, str(len(results)))} open ports.")
+        ok(f"Found {color(WHITE, str(len(results)))} warm spots!")
 
 # ---------------------------------------------------------------------------
 # Module 6: DNS lookup
@@ -398,13 +417,14 @@ def module_dns(args):
         fail(f"Invalid domain format: {target}")
         sys.exit(1)
 
-    info(f"Looking up: {color(CYAN, target)}")
+    paw_print()
+    info(f"Scent tracking (DNS): {color(CYAN, target)}")
     try:
         ip = resolve(target)
         if ip:
-            ok(f"A: {color(GREEN, ip)}")
+            ok(f"A record: {color(GREEN, ip)}")
         else:
-            warn("No A record found")
+            warn("No A scent trail found")
 
         try:
             info_data = socket.getaddrinfo(target, None)
@@ -412,7 +432,7 @@ def module_dns(args):
                 fam = item[0]
                 addr = item[4][0]
                 if fam == socket.AF_INET6:
-                    ok(f"AAAA: {color(GREEN, addr)}")
+                    ok(f"AAAA record: {color(GREEN, addr)}")
         except socket.gaierror:
             pass
 
@@ -423,7 +443,7 @@ def module_dns(args):
                     capture_output=True, text=True, timeout=15
                 ).stdout.strip()
                 if txt_out:
-                    ok(f"TXT: {color(GREEN, txt_out)}")
+                    ok(f"TXT record: {color(GREEN, txt_out)}")
             except Exception:
                 pass
 
@@ -439,7 +459,8 @@ def module_tls(args):
     hostname = target.split(":")[0]
     port = int(target.split(":")[1]) if ":" in target else 443
 
-    info(f"Checking TLS: {color(CYAN, hostname)}:{port}")
+    paw_print()
+    info(f"Checking collar tag (TLS): {color(CYAN, hostname)}:{port}")
     ctx = make_ctx(verify=not args.no_verify)
     try:
         with socket.create_connection((hostname, port), timeout=args.timeout) as sock:
@@ -471,11 +492,11 @@ def module_tls(args):
                     ok(f"JSON saved to {color(GRAY, out)}")
                     return
 
-                ok(f"Protocol: {color(WHITE, version)}")
-                ok(f"Cipher: {color(GREEN, cipher[0])} {cipher[1]}")
-                ok(f"Subject CN: {color(WHITE, subject.get('commonName', 'N/A'))}")
-                ok(f"Issuer CN: {color(WHITE, issuer.get('commonName', 'N/A'))}")
-                ok(f"Valid: {color(YELLOW, not_before)} -> {color(YELLOW, not_after)}")
+                ok(f"Collar type (Protocol): {color(WHITE, version)}")
+                ok(f"Lock (Cipher): {color(GREEN, cipher[0])} {cipher[1]}")
+                ok(f"Tag owner (Subject CN): {color(WHITE, subject.get('commonName', 'N/A'))}")
+                ok(f"Tag maker (Issuer CN): {color(WHITE, issuer.get('commonName', 'N/A'))}")
+                ok(f"Valid dates: {color(YELLOW, not_before)} -> {color(YELLOW, not_after)}")
     except Exception as e:
         fail(str(e))
 
@@ -489,7 +510,8 @@ def module_banner(args):
         target = f"{target}"
 
     proto = "https" if args.https or target.startswith("https://") else "tcp"
-    info(f"Grabbing banner: {color(CYAN, target)} ({proto})")
+    paw_print()
+    info(f"Pouncing on banner: {color(CYAN, target)} ({proto})")
 
     if proto == "https":
         hostname = target.replace("https://", "").split("/")[0]
@@ -531,7 +553,7 @@ def module_banner(args):
                 ok(f"JSON saved to {color(GRAY, out)}")
             else:
                 print(f"\n{color(GREEN, data.strip())}\n")
-                ok("Banner received")
+                ok("Banner caught")
     except Exception as e:
         fail(str(e))
 
@@ -549,40 +571,40 @@ def main():
     parser.add_argument("--output", "-o", help="Output file path")
     parser.add_argument("--timeout", type=float, default=10.0, help="Request timeout (default: 10)")
     parser.add_argument("--workers", type=int, default=0, help="Concurrent workers (0 = auto)")
-    parser.add_argument("--delay", type=float, default=0, help="Delay between batches in seconds")
+    parser.add_argument("--delay", type=float, default=0, help="Delay between batches for stealth")
     parser.add_argument("--no-verify", action="store_true", help="Disable TLS verification")
     parser.add_argument("--quiet", "-q", action="store_true", help="Quiet mode, JSON only")
     sub = parser.add_subparsers(dest="module", required=True)
 
-    p_sub = sub.add_parser("subdomain", help="Subdomain brute-force")
+    p_sub = sub.add_parser("subdomain", help="Sniff subdomains")
     p_sub.add_argument("--domain", required=True)
     p_sub.add_argument("--wordlist", default=None)
     p_sub.add_argument("--output", default=None)
 
-    p_nmap = sub.add_parser("nmap", help="Parse nmap output for open ports")
+    p_nmap = sub.add_parser("nmap", help="Parse nmap den map")
     p_nmap.add_argument("--file", required=True)
 
-    p_hdr = sub.add_parser("headers", help="Grab HTTP response headers")
+    p_hdr = sub.add_parser("headers", help="Sniff scent marks (HTTP headers)")
     p_hdr.add_argument("--target", required=True)
     p_hdr.add_argument("--https", action="store_true")
     p_hdr.add_argument("--no-verify", action="store_true", help="Disable TLS verification")
 
-    p_fp = sub.add_parser("fingerprint", help="Lightweight tech fingerprint")
+    p_fp = sub.add_parser("fingerprint", help="Identify den markers")
     p_fp.add_argument("--target", required=True)
     p_fp.add_argument("--https", action="store_true")
     p_fp.add_argument("--no-verify", action="store_true", help="Disable TLS verification")
 
-    p_ps = sub.add_parser("portscan", help="Quick top-100 port scan")
+    p_ps = sub.add_parser("portscan", help="Prowl for open ports")
     p_ps.add_argument("--target", required=True)
 
-    p_dns = sub.add_parser("dns", help="DNS lookup + basic records")
+    p_dns = sub.add_parser("dns", help="Scent tracking (DNS)")
     p_dns.add_argument("--target", required=True)
-    p_dns.add_argument("--txt", action="store_true", help="Attempt TXT lookup via dig")
+    p_dns.add_argument("--txt", action="store_true", help="Sniff TXT records")
 
-    p_tls = sub.add_parser("tls", help="TLS/certificate info")
+    p_tls = sub.add_parser("tls", help="Check collar tag (TLS)")
     p_tls.add_argument("--target", required=True)
 
-    p_banner = sub.add_parser("banner", help="Grab service banner (HTTP/TCP)")
+    p_banner = sub.add_parser("banner", help="Pounce on banner")
     p_banner.add_argument("--target", required=True)
     p_banner.add_argument("--https", action="store_true")
     p_banner.add_argument("--no-verify", action="store_true", help="Disable TLS verification")
