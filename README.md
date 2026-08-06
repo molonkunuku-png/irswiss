@@ -9,7 +9,7 @@
 |____/|_| \_\____/|_| 
 ```
 
-**Irene Swiss** — lightweight recon toolkit. Subdomain brute-force, nmap parser, HTTP headers, fingerprinting, quick port scan, DNS lookup, TLS info, banner grabber. Single-file Python, zero heavy dependencies.
+**Irene Swiss** v1.2.0 — lightweight recon toolkit. Subdomain brute-force, nmap parser, HTTP headers, fingerprinting, quick port scan, DNS lookup, TLS info, banner grabber. Single-file Python, zero heavy dependencies.
 
 ## Usage
 
