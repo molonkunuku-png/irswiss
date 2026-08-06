@@ -10,6 +10,8 @@ import json
 import os
 import random
 import re
+import shutil
+import subprocess
 import sys
 import socket
 import ssl
@@ -414,9 +416,12 @@ def module_dns(args):
         except socket.gaierror:
             pass
 
-        if args.txt and os.popen("which dig").read().strip():
+        if args.txt and shutil.which("dig"):
             try:
-                txt_out = os.popen(f"dig +short TXT {target} 2>/dev/null").read().strip()
+                txt_out = subprocess.run(
+                    ["dig", "+short", "TXT", target],
+                    capture_output=True, text=True, timeout=15
+                ).stdout.strip()
                 if txt_out:
                     ok(f"TXT: {color(GREEN, txt_out)}")
             except Exception:
@@ -483,7 +488,7 @@ def module_banner(args):
     if not target.startswith("http"):
         target = f"{target}"
 
-    proto = "https" if args.https else "tcp"
+    proto = "https" if args.https or target.startswith("https://") else "tcp"
     info(f"Grabbing banner: {color(CYAN, target)} ({proto})")
 
     if proto == "https":
