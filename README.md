@@ -42,4 +42,6 @@ chmod +x irswiss.py
 
 MIT License. See [LICENSE](LICENSE) for full text.
 
-Use only on systems you own or have explicit written authorization to test.
+Disclaimer
+
+This tool is for authorized security testing only. The author is not responsible for misuse or damages. This is not legal advice.
