@@ -29,16 +29,16 @@ GRAY = "\033[90m"
 
 DOMAIN_RE = re.compile(r'^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$')
 
-LOGO = rf""" {CYAN} _____ _       _____ _____    ____  _   _    _    _   _  ____  _____ 
-{GREEN}/ ____| |     / ____|  __ \  / __ \| \ | |  / \  | \ | |/ __ \|  ___|
-{MAGENTA}| |    | |    | (___ | |__) || |  | |  \| | / _ \ |  \| | |  | | |_   
-{RED}| |    | |     \___ \|  _  / | |  | | . ` |/ ___ \| . ` | |  | |  _|  
-{BLUE}| |____| |____ ____) | | \ \ | |__| | |\  /_/   \_\ |\  | |__| | |    
-{WHITE} \_____|______|_____/|_|  \_\ \____/|_| \_/_/     \_\_| \_\____/|_| {RESET}"""
+LOGO = rf""" {GREEN} ____  _   _  ____  _____ 
+{BLUE}|  _ \| \ | |/ __ \|  ___|
+{MAGENTA}| |_) |  \| | |  | | |_   
+{CYAN}|  _ <| . ` | |  | |  _|  
+{YELLOW}| |_) | |\  | |__| | |    
+{RED}|____/|_| \_\____/|_| {RESET}"""
 
 def logo():
     print(LOGO)
-    print(f"  {GRAY}v0.1 — lightweight recon toolkit{RESET}\n")
+    print(f"  {GRAY}Irene Swiss — lightweight recon toolkit{RESET}\n")
 
 def ts():
     return datetime.now().strftime("%H:%M:%S")

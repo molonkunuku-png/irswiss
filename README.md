@@ -1,15 +1,15 @@
-# irswiss
+# Irene Swiss
 
 ```
- _____ _       _____ _____    ____  _   _    _    _   _  ____  _____ 
-/ ____| |     / ____|  __ \  / __ \| \ | |  / \  | \ | |/ __ \|  ___|
-| |    | |    | (___ | |__) || |  | |  \| | / _ \ |  \| | |  | | |_   
-| |    | |     \___ \|  _  / | |  | | . ` |/ ___ \| . ` | |  | |  _|  
-| |____| |____ ____) | | \ \ | |__| | |\  /_/   \_\ |\  | |__| | |    
- \_____|______|_____/|_|  \_\ \____/|_| \_/_/     \_\_| \_\____/|_|  
+ ____  _   _  ____  _____ 
+|  _ \| \ | |/ __ \|  ___|
+| |_) |  \| | |  | | |_   
+|  _ <| . ` | |  | |  _|  
+| |_) | |\  | |__| | |    
+|____/|_| \_\____/|_|  
 ```
 
-**irswiss** — lightweight recon toolkit by Irene. Subdomain brute-force, nmap parser, HTTP headers, fingerprinting, and quick port scan. Single-file Python, zero heavy dependencies.
+**Irene Swiss** — lightweight recon toolkit. Subdomain brute-force, nmap parser, HTTP headers, fingerprinting, and quick port scan. Single-file Python, zero heavy dependencies.
 
 ## Usage
 
@@ -39,5 +39,7 @@ chmod +x irswiss.py
 - `seclists` for subdomain wordlists (default: `/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt`)
 
 ## Legal
+
+MIT License. See [LICENSE](LICENSE) for full text.
 
 Use only on systems you own or have explicit written authorization to test.
