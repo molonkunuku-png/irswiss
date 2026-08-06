@@ -65,6 +65,8 @@ USER_AGENTS = [
     "Mozilla/5.0 (compatible; irswiss-furry/1.0; +https://github.com/melonkunuku-png/irswiss)",
 ]
 
+VERSION = "1.2.0"
+
 def logo():
     print(LOGO)
     print(f"  {PINK}~*~ Irene Swiss — lightweight recon toolkit ~*~{RESET}\n")
@@ -567,6 +569,7 @@ def main():
         description="irswiss — lightweight recon toolkit by 6mins",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
+    parser.add_argument("--version", "-V", action="version", version=f"%(prog)s {VERSION}")
     parser.add_argument("--json", action="store_true", help="Output JSON instead of text")
     parser.add_argument("--output", "-o", help="Output file path")
     parser.add_argument("--timeout", type=float, default=10.0, help="Request timeout (default: 10)")
